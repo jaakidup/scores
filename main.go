@@ -40,6 +40,7 @@ func main() {
 
 }
 
+// PointsSignature calculates whether plural is needed
 func PointsSignature(points int) string {
 	if points == 0 || points >= 2 {
 		return "pts"
@@ -63,6 +64,8 @@ func WriteToFile(outputFile string, teams []Team) error {
 	return nil
 }
 
+// SortTeamStandings sorts the teams according to total points
+// teams with equal points get sorted alphabetically
 func SortTeamStanding(teamsMap TeamsMap) []Team {
 
 	teams := []Team{}
@@ -103,27 +106,10 @@ func ExtractTeamScoreMap(inputFileName string) (TeamsMap, error) {
 
 		teams := strings.Split(scanner.Text(), ",")
 
-		t1, t1score := ExtractTeamAndScore((teams[0]))
-		t2, t2score := ExtractTeamAndScore((teams[1]))
+		t1, t1Score := ExtractTeamAndScore((teams[0]))
+		t2, t2Score := ExtractTeamAndScore((teams[1]))
 
-		// Let's calculate the points based on match scores
-		if t1score == t2score {
-			teamsMap[t1] = teamsMap[t1] + 1
-			teamsMap[t2] = teamsMap[t2] + 1
-		}
-
-		if t1score > t2score {
-			teamsMap[t1] = teamsMap[t1] + 3
-		}
-		if t1score < t2score {
-			teamsMap[t2] = teamsMap[t2] + 3
-		}
-		if t1score == 0 {
-			teamsMap[t1] = teamsMap[t1] + 0
-		}
-		if t2score == 0 {
-			teamsMap[t2] = teamsMap[t2] + 0
-		}
+		teamsMap = CalculateTeamPoints(teamsMap, t1, t1Score, t2, t2Score)
 
 	}
 	if err := scanner.Err(); err != nil {
@@ -131,6 +117,27 @@ func ExtractTeamScoreMap(inputFileName string) (TeamsMap, error) {
 	}
 
 	return teamsMap, nil
+}
+
+// CalculateTeamPoints takes a two team match and calculates the league standings based on scores
+func CalculateTeamPoints(teamsMap TeamsMap, t1 string, t1Score int, t2 string, t2Score int) TeamsMap {
+	if t1Score == t2Score {
+		teamsMap[t1] = teamsMap[t1] + 1
+		teamsMap[t2] = teamsMap[t2] + 1
+	}
+	if t1Score > t2Score {
+		teamsMap[t1] = teamsMap[t1] + 3
+	}
+	if t1Score < t2Score {
+		teamsMap[t2] = teamsMap[t2] + 3
+	}
+	if t1Score == 0 {
+		teamsMap[t1] = teamsMap[t1] + 0
+	}
+	if t2Score == 0 {
+		teamsMap[t2] = teamsMap[t2] + 0
+	}
+	return teamsMap
 }
 
 // ExtractTeamAndScore takes a team name and a score as a string combo
